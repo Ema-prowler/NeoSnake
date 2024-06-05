@@ -17,11 +17,11 @@ blue = (50, 153, 213)
 dis_width = 800
 dis_height = 600
 dis = pygame.display.set_mode((dis_width, dis_height))
-pygame.display.set_caption('Snake game de ema :3')  # Corrección aquí
+pygame.display.set_caption('Snake game de ema :3')
 
 # Configuración del reloj y tamaño de la serpiente
 clock = pygame.time.Clock()
-snake_block = 10
+snake_block = 20  # Nuevo tamaño del bloque de la serpiente
 snake_speed = 15
 original_snake_speed = snake_speed
 
@@ -41,9 +41,16 @@ def our_snake(snake_block, snake_List):
 
 
 # Función para mostrar mensajes
-def message(msg, color):
-    mesg = font_style.render(msg, True, color)
-    dis.blit(mesg, [dis_width / 6, dis_height / 3])
+def message(msg, color, font_size):
+    font = pygame.font.SysFont(None, font_size)
+    mesg = font.render(msg, True, color)
+    text_rect = mesg.get_rect(center=(dis_width / 2, dis_height / 2))
+    dis.blit(mesg, text_rect)
+
+
+# Función para verificar colisiones
+def is_collision(x1, y1, x2, y2, block_size):
+    return x2 <= x1 < x2 + block_size and y2 <= y1 < y2 + block_size
 
 
 # Función principal del juego
@@ -73,7 +80,7 @@ def gameLoop():
     while not game_over:
         while game_close:
             dis.fill(blue)
-            message("You Lost! Press Q-Quit or C-Play Again", red)
+            message("¡Perdiste! Presiona Q-Salir o C-Jugar de nuevo", red, 40)
             pygame.display.update()
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -101,10 +108,21 @@ def gameLoop():
                     y1_change = snake_block
                     x1_change = 0
 
-        if x1 >= dis_width or x1 < 0 or y1 >= dis_height or y1 < 0:
-            game_close = True
+        # Mover la serpiente
         x1 += x1_change
         y1 += y1_change
+
+        # Verificar si la serpiente atraviesa los bordes de la pantalla y aparece en el lado opuesto
+        if x1 >= dis_width:
+            x1 = 0
+        elif x1 < 0:
+            x1 = dis_width - snake_block
+
+        if y1 >= dis_height:
+            y1 = 0
+        elif y1 < 0:
+            y1 = dis_height - snake_block
+
         dis.fill(blue)
         pygame.draw.rect(dis, green, [foodx, foody, snake_block, snake_block])
         snake_Head = []
@@ -135,12 +153,14 @@ def gameLoop():
         if power_up_visible:
             dis.blit(power_up_image, (power_up_x, power_up_y))
 
-        if x1 == foodx and y1 == foody:
+        # Detección de colisiones con la comida
+        if is_collision(x1, y1, foodx, foody, snake_block):
             foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
             foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
             Length_of_snake += 1
 
-        if power_up_visible and x1 == power_up_x and y1 == power_up_y:
+        # Detección de colisiones con el power-up
+        if power_up_visible and is_collision(x1, y1, power_up_x, power_up_y, snake_block):
             power_up_visible = False
             snake_speed += int(original_snake_speed * 0.25)
             power_up_end_time = current_time + power_up_duration

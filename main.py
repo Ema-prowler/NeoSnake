@@ -22,8 +22,8 @@ pygame.display.set_caption('Snake game de ema :3')
 # Configuración del reloj y tamaño de la serpiente
 clock = pygame.time.Clock()
 snake_block = 20  # Nuevo tamaño del bloque de la serpiente
-snake_speed = 15
-original_snake_speed = snake_speed
+original_snake_speed = 15
+snake_speed = original_snake_speed  # Definimos snake_speed aquí
 
 # Definición de fuentes
 font_style = pygame.font.SysFont(None, 50)
@@ -33,12 +33,14 @@ score_font = pygame.font.SysFont(None, 35)
 power_up_image = pygame.image.load('power_up.png')
 power_up_image = pygame.transform.scale(power_up_image, (snake_block, snake_block))
 
+# Carga de los sonidos
+eating_sound = pygame.mixer.Sound('Apple.wav')
+power_up_sound = pygame.mixer.Sound('Power_Up.wav')
 
 # Función para dibujar la serpiente
 def our_snake(snake_block, snake_List):
     for x in snake_List:
         pygame.draw.rect(dis, black, [x[0], x[1], snake_block, snake_block])
-
 
 # Función para mostrar mensajes
 def message(msg, color, font_size):
@@ -47,11 +49,9 @@ def message(msg, color, font_size):
     text_rect = mesg.get_rect(center=(dis_width / 2, dis_height / 2))
     dis.blit(mesg, text_rect)
 
-
 # Función para verificar colisiones
 def is_collision(x1, y1, x2, y2, block_size):
     return x2 <= x1 < x2 + block_size and y2 <= y1 < y2 + block_size
-
 
 # Función principal del juego
 def gameLoop():
@@ -67,9 +67,8 @@ def gameLoop():
 
     # Variable para llevar un registro de cuánta comida ha comido la serpiente
     food_count = 0
-    # Variable para mostrar el tiempo que queda del power up :3
+    # Variable para mostrar el tiempo que queda del power up
     power_up_time = 0
-
 
     foodx = round(random.randrange(0, dis_width - snake_block) / snake_block) * snake_block
     foody = round(random.randrange(0, dis_height - snake_block) / snake_block) * snake_block
@@ -162,35 +161,40 @@ def gameLoop():
         # Detección de colisiones con la comida
         if is_collision(x1, y1, foodx, foody, snake_block):
             print("Colisión con comida")
+            eating_sound.play()
             foodx = round(random.randrange(0, dis_width - snake_block) / snake_block) * snake_block
             foody = round(random.randrange(0, dis_height - snake_block) / snake_block) * snake_block
             Length_of_snake += 1
             food_count += 1
 
-        power_up_time = power_up_end_time - current_time
-
         # Detección de colisiones con el power-up
         if power_up_visible and is_collision(x1, y1, power_up_x, power_up_y, snake_block):
             print("Colisión con power-up")
+            power_up_sound.play()
             power_up_visible = False
             snake_speed += int(original_snake_speed * 0.25)
-            power_up_end_time = current_time + power_up_duration
+            remaining_time = max(0, power_up_end_time - current_time)
+            power_up_end_time = current_time + power_up_duration + remaining_time
 
-        # Restaurar la velocidad original después de que el power-up expire
-        if current_time > power_up_end_time:
-            snake_speed = original_snake_speed  # Revertir la velocidad al valor original
+        # Calcular el tiempo restante del power-up
+        if current_time < power_up_end_time:
+            power_up_time = power_up_end_time - current_time
+        else:
+            power_up_time = 0
+            snake_speed = original_snake_speed  # Revertir la velocidad al valor original cuando expira el power-up
 
-        power_up_text = score_font.render("Power-Up: " + str(round(power_up_time)), True, white)
-        dis.blit(power_up_text, (10, 30))
-
+        # Mostrar el contador de comida
         food_text = score_font.render("Comida: " + str(food_count), True, white)
         dis.blit(food_text, (10, 10))
+
+        # Mostrar el tiempo restante del power-up en la esquina superior izquierda de la pantalla, debajo del contador de comida
+        power_up_text = score_font.render("Power-Up: " + str(round(power_up_time)), True, white)
+        dis.blit(power_up_text, (10, 40))
 
         pygame.display.update()
         clock.tick(snake_speed)
 
     pygame.quit()
     quit()
-
 
 gameLoop()

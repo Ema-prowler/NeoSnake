@@ -65,12 +65,12 @@ def gameLoop():
     snake_List = []
     Length_of_snake = 1
 
-    foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-    foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+    foodx = round(random.randrange(0, dis_width - snake_block) / snake_block) * snake_block
+    foody = round(random.randrange(0, dis_height - snake_block) / snake_block) * snake_block
 
     # Inicialización del power-up
-    power_up_x = None
-    power_up_y = None
+    power_up_x = round(random.randrange(0, dis_width - snake_block) / snake_block) * snake_block
+    power_up_y = round(random.randrange(0, dis_height - snake_block) / snake_block) * snake_block
     power_up_start_time = None
     power_up_duration = 0
     power_up_visible = False
@@ -143,8 +143,8 @@ def gameLoop():
         if power_up_visible and current_time - power_up_start_time > power_up_duration:
             power_up_visible = False
         if not power_up_visible and current_time > power_up_next_appearance:
-            power_up_x = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-            power_up_y = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+            power_up_x = round(random.randrange(0, dis_width - snake_block) / snake_block) * snake_block
+            power_up_y = round(random.randrange(0, dis_height - snake_block) / snake_block) * snake_block
             power_up_start_time = current_time
             power_up_duration = random.randint(5, 10)
             power_up_visible = True
@@ -155,12 +155,14 @@ def gameLoop():
 
         # Detección de colisiones con la comida
         if is_collision(x1, y1, foodx, foody, snake_block):
-            foodx = round(random.randrange(0, dis_width - snake_block) / 10.0) * 10.0
-            foody = round(random.randrange(0, dis_height - snake_block) / 10.0) * 10.0
+            print("Colisión con comida")
+            foodx = round(random.randrange(0, dis_width - snake_block) / snake_block) * snake_block
+            foody = round(random.randrange(0, dis_height - snake_block) / snake_block) * snake_block
             Length_of_snake += 1
 
         # Detección de colisiones con el power-up
         if power_up_visible and is_collision(x1, y1, power_up_x, power_up_y, snake_block):
+            print("Colisión con power-up")
             power_up_visible = False
             snake_speed += int(original_snake_speed * 0.25)
             power_up_end_time = current_time + power_up_duration

@@ -21,7 +21,7 @@ pygame.display.set_caption('Snake game de ema :3')
 
 # Configuración del reloj y tamaño de la serpiente
 clock = pygame.time.Clock()
-snake_block = 20  # Nuevo tamaño del bloque de la serpiente
+snake_block = 30  # Nuevo tamaño del bloque de la serpiente
 original_snake_speed = 15
 snake_speed = original_snake_speed  # Definimos snake_speed aquí
 
@@ -51,13 +51,14 @@ def message(msg, color, font_size):
 
 # Función para verificar colisiones
 def is_collision(x1, y1, x2, y2, block_size):
-    return x2 <= x1 < x2 + block_size and y2 <= y1 < y2 + block_size
+    return x1 < x2 + block_size and x1 + block_size > x2 and y1 < y2 + block_size and y1 + block_size > y2
+
+
 
 # Función principal del juego
 def gameLoop():
     game_over = False
     game_close = False
-
     x1 = dis_width / 2
     y1 = dis_height / 2
     x1_change = 0
@@ -82,22 +83,12 @@ def gameLoop():
     power_up_next_appearance = time.time() + random.randint(1, 10)
     power_up_end_time = 0  # Inicialización de power_up_end_time
 
-    while not game_over:
-        while game_close:
-            dis.fill(blue)
-            message("¡Perdiste! Presiona Q-Salir o C-Jugar de nuevo", red, 40)
-            pygame.display.update()
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        game_over = True
-                        game_close = False
-                    if event.key == pygame.K_c:
-                        gameLoop()
 
+    while not game_over:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
+                game_close = False
             if event.type == pygame.KEYDOWN:
                 # Evitar que la serpiente se mueva en la dirección opuesta inmediata
                 if event.key == pygame.K_LEFT and x1_change == 0:
@@ -183,6 +174,7 @@ def gameLoop():
             power_up_time = 0
             snake_speed = original_snake_speed  # Revertir la velocidad al valor original cuando expira el power-up
 
+
         # Mostrar el contador de comida
         food_text = score_font.render("Comida: " + str(food_count), True, white)
         dis.blit(food_text, (10, 10))
@@ -191,10 +183,28 @@ def gameLoop():
         power_up_text = score_font.render("Power-Up: " + str(round(power_up_time)), True, white)
         dis.blit(power_up_text, (10, 40))
 
+
+
         pygame.display.update()
         clock.tick(snake_speed)
 
+        while game_close:
+            dis.fill(blue)
+            message("¡Perdiste! Presiona Q-Salir o C-Jugar de nuevo", red, 40)
+            pygame.display.update()
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_c:
+                        gameLoop()
+                if event.type == pygame.QUIT:
+                    game_over = True
+                    game_close = False
+
     pygame.quit()
     quit()
+
 
 gameLoop()

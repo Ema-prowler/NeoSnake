@@ -65,6 +65,12 @@ def gameLoop():
     snake_List = []
     Length_of_snake = 1
 
+    # Variable para llevar un registro de cuánta comida ha comido la serpiente
+    food_count = 0
+    # Variable para mostrar el tiempo que queda del power up :3
+    power_up_time = 0
+
+
     foodx = round(random.randrange(0, dis_width - snake_block) / snake_block) * snake_block
     foody = round(random.randrange(0, dis_height - snake_block) / snake_block) * snake_block
 
@@ -159,6 +165,9 @@ def gameLoop():
             foodx = round(random.randrange(0, dis_width - snake_block) / snake_block) * snake_block
             foody = round(random.randrange(0, dis_height - snake_block) / snake_block) * snake_block
             Length_of_snake += 1
+            food_count += 1
+
+        power_up_time = power_up_end_time - current_time
 
         # Detección de colisiones con el power-up
         if power_up_visible and is_collision(x1, y1, power_up_x, power_up_y, snake_block):
@@ -170,6 +179,12 @@ def gameLoop():
         # Restaurar la velocidad original después de que el power-up expire
         if current_time > power_up_end_time:
             snake_speed = original_snake_speed  # Revertir la velocidad al valor original
+
+        power_up_text = score_font.render("Power-Up: " + str(round(power_up_time)), True, white)
+        dis.blit(power_up_text, (10, 30))
+
+        food_text = score_font.render("Comida: " + str(food_count), True, white)
+        dis.blit(food_text, (10, 10))
 
         pygame.display.update()
         clock.tick(snake_speed)

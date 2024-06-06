@@ -53,8 +53,6 @@ def message(msg, color, font_size):
 def is_collision(x1, y1, x2, y2, block_size):
     return x1 < x2 + block_size and x1 + block_size > x2 and y1 < y2 + block_size and y1 + block_size > y2
 
-
-
 # Función principal del juego
 def gameLoop():
     game_over = False
@@ -182,7 +180,6 @@ def gameLoop():
         # Mostrar el tiempo restante del power-up en la esquina superior izquierda de la pantalla, debajo del contador de comida
         power_up_text = score_font.render("Power-Up: " + str(round(power_up_time)), True, white)
         dis.blit(power_up_text, (10, 40))
-
 
 
         pygame.display.update()
